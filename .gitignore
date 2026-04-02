@@ -1,0 +1,67 @@
+# ============================================================
+# ML MASTER SELLER — .gitignore
+# ============================================================
+
+# --- Segurança: nunca versionar credenciais ---
+.env
+*.key
+*.pem
+secrets/
+
+# --- Playwright: perfil persistente do browser ---
+ml_profile/
+playwright-state.json
+
+# --- Banco de dados ---
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# --- Exportações e outputs ---
+outputs/
+*.csv
+*.xlsx
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# --- Ambiente virtual ---
+venv/
+.venv/
+env/
+ENV/
+.env.bak
+
+# --- Logs ---
+logs/
+*.log
+
+# --- IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Distribuição / empacotamento ---
+*.zip
+*.tar.gz
+*.rar
+
+# --- Pytest / coverage ---
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
