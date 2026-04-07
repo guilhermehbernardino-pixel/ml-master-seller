@@ -92,7 +92,7 @@ class TelegramDistributor:
                     "chat_id": channel,
                     "photo": image_url,
                     "caption": text[:1024],  # Limite de legenda do Telegram
-                    "parse_mode": "Markdown",
+                    "parse_mode": "HTML",
                     "disable_web_page_preview": False,
                 }
             else:
@@ -101,7 +101,7 @@ class TelegramDistributor:
                 payload = {
                     "chat_id": channel,
                     "text": text[:4096],
-                    "parse_mode": "Markdown",
+                    "parse_mode": "HTML",
                     "disable_web_page_preview": False,
                 }
 

@@ -129,10 +129,13 @@ class MLSession:
         logger.info("🔐 Verificando sessão...")
         
         # Testa se já está logado
-        await self._page.goto("https://www.mercadolivre.com.br/afiliados/dashboard", 
-                               wait_until="networkidle", timeout=30000)
+        try:
+            await self._page.goto("https://www.mercadolivre.com.br/afiliados/dashboard",
+                                   wait_until="domcontentloaded", timeout=30000)
+        except Exception:
+            pass
         await HumanSimulator.random_delay(1, 2)
-        
+
         if "afiliados" in self._page.url and "login" not in self._page.url:
             logger.info("✅ Sessão válida (cookies funcionando)")
             self._is_logged_in = True
@@ -140,7 +143,8 @@ class MLSession:
 
         # Precisa fazer login
         logger.info("🔑 Fazendo login...")
-        await self._page.goto("https://www.mercadolivre.com.br/", wait_until="networkidle")
+        await self._page.goto("https://www.mercadolivre.com.br/",
+                               wait_until="domcontentloaded", timeout=30000)
         await HumanSimulator.random_delay(1, 2)
 
         # Clica em entrar
@@ -148,8 +152,8 @@ class MLSession:
             await HumanSimulator.human_click(self._page, 'a[href*="login"]')
             await HumanSimulator.random_delay(1.5, 3)
         except:
-            await self._page.goto("https://www.mercadolivre.com.br/jms/mlb/lgz/login", 
-                                   wait_until="networkidle")
+            await self._page.goto("https://www.mercadolivre.com.br/jms/mlb/lgz/login",
+                                   wait_until="domcontentloaded", timeout=30000)
 
         # Preenche email
         try:

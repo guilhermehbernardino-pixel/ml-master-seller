@@ -160,8 +160,8 @@ Use Markdown do Telegram para formatação."""
         savings = self._get_savings(product['price'], product['original_price'])
         url = product.get('affiliate_url') or product['url']
         
-        shipping = "🚚 **FRETE GRÁTIS!**\n" if product.get('free_shipping') else ""
-        flash = "⚡ **OFERTA RELÂMPAGO** — Corre!\n" if product.get('is_flash_deal') else ""
+        shipping = "🚚 <b>FRETE GRÁTIS!</b>\n" if product.get('free_shipping') else ""
+        flash = "⚡ <b>OFERTA RELÂMPAGO</b> — Corre!\n" if product.get('is_flash_deal') else ""
         
         emojis = ["🔥", "💥", "🎯", "⭐", "🏆", "💎", "🚀", "✅"]
         emoji = random.choice(emojis)
@@ -174,15 +174,15 @@ Use Markdown do Telegram para formatação."""
         cat_emoji = next((v for k, v in cat_emojis.items() 
                           if k.lower() in product['category_name'].lower()), "🛍️")
 
-        template = f"""{emoji} {cat_emoji} **OFERTA IMPERDÍVEL!**
+        template = f"""{emoji} {cat_emoji} <b>OFERTA IMPERDÍVEL!</b>
 
-🛒 {title}...
-💰 ~~{original}~~ por apenas **{price}**
-📉 **{discount}% OFF** — Economia de **{savings}**
+🛒 {title}
+💰 De <s>{original}</s> por apenas <b>{price}</b>
+📉 <b>{discount}% OFF</b> — Economia de <b>{savings}</b>
 {shipping}{flash}
-👉 Garante o seu aqui: {url}
+👉 <a href="{url}">Garanta o seu aqui</a>
 
-#oferta #desconto #mercadolivre #compras"""
+#oferta #desconto #mercadolivre"""
 
         return template
 
