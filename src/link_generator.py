@@ -318,14 +318,13 @@ class AffiliateLinkGenerator:
             logger.warning("Tag de afiliado não configurada")
             return None
 
-        # Formato padrão de link de afiliado ML
-        if product_id:
-            affiliate_url = f"https://mercadolivre.com/sec/affiliate?deal_id={product_id}&sshare={tag}"
+        # URL real do catálogo ML com tag de afiliado
+        if product_id and product_id.startswith("MLB"):
+            affiliate_url = f"https://www.mercadolivre.com.br/p/{product_id}?ref={tag}"
         else:
-            # Adiciona parâmetro de rastreio à URL original
             separator = "&" if "?" in product_url else "?"
-            affiliate_url = f"{product_url}{separator}utm_source={tag}&utm_medium=affiliate"
-        
+            affiliate_url = f"{product_url}{separator}ref={tag}"
+
         return affiliate_url
 
     async def generate_batch(self, product_urls: List[tuple]) -> dict:
