@@ -143,43 +143,36 @@ class MLSession:
 
         # Precisa fazer login
         logger.info("🔑 Fazendo login...")
-        await self._page.goto("https://www.mercadolivre.com.br/",
-                               wait_until="domcontentloaded", timeout=30000)
-        await HumanSimulator.random_delay(1, 2)
-
-        # Clica em entrar
+        # Timeout curto: se ML bloquear (anti-bot), cai rápido no fallback
+        self._page.set_default_timeout(8000)
         try:
-            await HumanSimulator.human_click(self._page, 'a[href*="login"]')
-            await HumanSimulator.random_delay(1.5, 3)
-        except:
             await self._page.goto("https://www.mercadolivre.com.br/jms/mlb/lgz/login",
-                                   wait_until="domcontentloaded", timeout=30000)
+                                   wait_until="domcontentloaded", timeout=15000)
+            await HumanSimulator.random_delay(1, 2)
 
-        # Preenche email
-        try:
             await HumanSimulator.human_type(self._page, '#user_id', self.email)
             await HumanSimulator.random_delay(0.5, 1.5)
             await self._page.keyboard.press("Enter")
             await HumanSimulator.random_delay(1.5, 3)
 
-            # Preenche senha
             await HumanSimulator.human_type(self._page, '#password', self.password)
             await HumanSimulator.random_delay(0.5, 1.5)
             await self._page.keyboard.press("Enter")
             await HumanSimulator.random_delay(3, 5)
 
-            # Verifica login
             if "mercadolivre.com.br" in self._page.url and "login" not in self._page.url:
                 logger.info("✅ Login realizado com sucesso!")
                 self._is_logged_in = True
                 await self._save_cookies()
                 return True
             else:
-                logger.error("❌ Falha no login. Verifique suas credenciais.")
+                logger.warning("⚠️ Login não concluído — usando links diretos")
                 return False
         except Exception as e:
-            logger.error(f"Erro durante login: {e}")
+            logger.warning(f"⚠️ Login bloqueado ({e.__class__.__name__}) — usando links diretos")
             return False
+        finally:
+            self._page.set_default_timeout(30000)
 
     async def _save_cookies(self):
         """Salva cookies para reutilizar sessão"""

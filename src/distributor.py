@@ -310,11 +310,15 @@ class MasterCampaign:
     async def initialize(self):
         """Inicializa todos os componentes"""
         logger.info("🚀 Iniciando ML MASTER AFILIADO...")
-        
-        # Inicia sessão ML
-        await self.ml_session.start(headless=True)
-        logged_in = await self.ml_session.login()
-        
+
+        # Tenta iniciar sessão ML com browser; falha graciosamente
+        try:
+            await self.ml_session.start(headless=True)
+            logged_in = await self.ml_session.login()
+        except Exception as e:
+            logger.warning(f"⚠️ Playwright indisponível ({e.__class__.__name__}): usando links diretos")
+            logged_in = False
+
         if logged_in:
             from src.link_generator import AffiliateLinkGenerator
             self._link_generator = AffiliateLinkGenerator(self.ml_session)
@@ -338,9 +342,13 @@ class MasterCampaign:
                     product.affiliate_url = link
                     self.product_engine.update_affiliate_url(product.id, link)
             else:
-                # Modo sem auth: usa URL com tag
+                # Modo sem auth: link direto com ref tag
                 tag = self.ml_session.affiliate_tag
-                product.affiliate_url = f"{product.url}?utm_source={tag}&utm_medium=affiliate"
+                if product.id and product.id.startswith("MLB"):
+                    product.affiliate_url = f"https://www.mercadolivre.com.br/p/{product.id}?ref={tag}"
+                else:
+                    sep = "&" if "?" in product.url else "?"
+                    product.affiliate_url = f"{product.url}{sep}ref={tag}"
                 self.product_engine.update_affiliate_url(product.id, product.affiliate_url)
 
         logger.info(f"🔗 Links gerados para {len([p for p in products if p.affiliate_url])} produtos")

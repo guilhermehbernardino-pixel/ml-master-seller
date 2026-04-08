@@ -25,6 +25,7 @@ sys.path.insert(0, str(BASE_DIR))
 APP_NAME = "ML Master Seller"
 VERSION = "v1.0"
 BRAND_COLOR = "#FFE600"       # Amarelo ML
+BRAND_YELLOW = BRAND_COLOR    # alias
 BRAND_DARK = "#2D3436"        # Fundo escuro
 BRAND_GREEN = "#00B050"       # Verde sucesso
 BRAND_RED = "#E84118"         # Vermelho erro
@@ -201,11 +202,15 @@ class MLMasterApp(tk.Tk):
         self._btn_stop.config(state="normal")
         self._set_status("Rodando", BRAND_GREEN)
         self._log_info("🚀 Iniciando campanha automática...")
-        self._run_subprocess(["run_campaign"])
+        # campaign_runner.py com argumento "campaign" roda MasterCampaign.run_forever()
+        self._run_subprocess(str(BASE_DIR / "campaign_runner.py"), ["campaign"])
 
     def _stop_campaign(self):
         if self._process:
-            self._process.terminate()
+            try:
+                self._process.terminate()
+            except Exception:
+                pass
         self._running = False
         self._btn_start.config(state="normal")
         self._btn_stop.config(state="disabled")
@@ -213,21 +218,30 @@ class MLMasterApp(tk.Tk):
         self._log_info("⛔ Campanha encerrada pelo usuário.")
 
     def _discover_only(self):
+        if self._running:
+            self._log_info("⚠️ Aguarde — campanha em execução.")
+            return
         self._log_info("🔍 Buscando e ranqueando produtos...")
-        self._run_subprocess(["products"])
+        self._run_subprocess(str(BASE_DIR / "campaign_runner.py"), ["products"])
 
     def _export_csv(self):
         self._log_info("📊 Exportando produtos para CSV...")
-        self._run_subprocess(["export"])
+        self._run_subprocess(str(BASE_DIR / "main.py"), ["export"])
 
-    def _run_subprocess(self, args: list):
-        """Executa main.py em thread separada e captura saída para o log."""
+    def _run_subprocess(self, script: str, args: list):
+        """Executa script em thread separada e captura saída para o log.
+        Usa python.exe (com console) para capturar stdout via pipe.
+        """
         def target():
-            python = str(BASE_DIR / "venv" / "Scripts" / "pythonw.exe")
+            # python.exe (não pythonw) para que stdout/stderr possam ser capturados
+            python = str(BASE_DIR / "venv" / "Scripts" / "python.exe")
             if not Path(python).exists():
                 python = sys.executable
 
-            cmd = [python, str(BASE_DIR / "main.py")] + args
+            env = os.environ.copy()
+            env["PYTHONUTF8"] = "1"
+
+            cmd = [python, "-u", script] + args   # -u: unbuffered stdout
             self._process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
@@ -236,6 +250,7 @@ class MLMasterApp(tk.Tk):
                 encoding="utf-8",
                 errors="replace",
                 cwd=str(BASE_DIR),
+                env=env,
             )
             for line in self._process.stdout:
                 line = line.rstrip()
@@ -305,10 +320,6 @@ class MLMasterApp(tk.Tk):
                 return
         self._stop_campaign()
         self.destroy()
-
-
-# Corrige referência à constante que estava indefinida
-BRAND_YELLOW = BRAND_COLOR
 
 
 if __name__ == "__main__":
